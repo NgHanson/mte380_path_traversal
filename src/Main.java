@@ -55,12 +55,23 @@ right < _ _ |_ _ > left
   };
   static Coordinate obj3 = new Coordinate(0, 4, '-');
 
+  static char[][] grid4 =  { // y
+    {'v','v','t','v','v','v'}, // 0
+    {'v','t','v','v','t','a'}, // 1
+    {'v','v','v','v','v','t'}, // 2
+    {'t','v','v','a','v','v'}, // 3
+    {'v','t','v','v','t','v'}, // 4
+    {'v','v','v','t','v','v'}, // 5
+    //x 0   1   2   3   4   5
+  };
+  static Coordinate obj4 = new Coordinate(4, 5, '-');
+
   // ------ TESTING GRID SETUPS -------------------------//
   static int breadthCount = 0;
 
   // should access as selectedGrid[y][x]
-  static char[][] selectedGrid = grid3;
-  static Coordinate selectedObjective = obj3;
+  static char[][] selectedGrid = grid4;
+  static Coordinate selectedObjective = obj4;
 
   static Coordinate startLocation = new Coordinate(3, 0, 'u');
 
@@ -72,11 +83,11 @@ right < _ _ |_ _ > left
 
   public static void main(String[] args) {
 
-    // SETUP STEPS
+    // --- SETUP STEPS ---//
     for (int i = 0; i < minCost.length; i++) {
       for (int j = 0; j < minCost[0].length; j++) {
         for (int k = 0; k < minCost[0][0].length; k++) {
-          minCost[i][j][k] = Integer.MAX_VALUE; // SHOULD BE HIGH ENOUGH
+          minCost[i][j][k] = Integer.MAX_VALUE;
         }
       }
     }
@@ -87,7 +98,7 @@ right < _ _ |_ _ > left
     starting.add(startLocation);
     pq.add(new TilePath(starting, 0, euclideanDist(startLocation.x, startLocation.y)));
     minCost[startLocation.y][startLocation.x][dirValue(startLocation.dir)] = 0;
-    // ------ //
+    // ------------------- //
 
     while (!pq.isEmpty()) {
 
@@ -98,14 +109,17 @@ right < _ _ |_ _ > left
       Coordinate curr = currList.get(currList.size() - 1);
       char currDir = curr.dir;
 
+      /*
       System.out.println("CURR POS - X: " + curr.x + " Y: " + curr.y + " DIR: " + currDir +
         " Curr Path Cost: " + currPathCost + " PQ Size: " + pq.size() );
       System.out.println();
-      //WE CAN ONLY MOVE FORWARD IN THE DIRECTION WE'RE FACING
+      */
 
+      //WE CAN ONLY MOVE FORWARD IN THE DIRECTION WE'RE FACING
       int forwardX = curr.x;
       int forwardY = curr.y;
 
+      // Determine the next grid location if we move forward given the current direction
       if (currDir == 'u') {
         forwardY++;
       } else if (currDir == 'l') {
@@ -117,13 +131,13 @@ right < _ _ |_ _ > left
       }
 
       if (validLocation(forwardX, forwardY)) {
-        if (forwardY == selectedObjective.y && forwardX == selectedObjective.x) {
+        if (forwardY == selectedObjective.y && forwardX == selectedObjective.x) { //WE REACHED THE OBJECTIVE
           printPath(currList);
           return;
         } else {
           int updatedPathCost = currPathCost + 1;
           if (updatedPathCost < minCost[forwardY][forwardX][dirValue(currDir)] ) {
-            double distCost = euclideanDist(forwardX, forwardY);
+            double distCost = euclideanDist(forwardX, forwardY); //Heuristic for PriorityQueue comparator
             minCost[forwardY][forwardX][dirValue(currDir)] = updatedPathCost;
             Coordinate newCoord = new Coordinate(forwardX, forwardY, currDir);
             List<Coordinate> newPath = deepCopy(currList);
@@ -134,28 +148,20 @@ right < _ _ |_ _ > left
         }
       }
 
-      // WE CAN ROTATE TO ALL THE !OTHER! DIRECTIONS
-      // DO NOT GO INTO ANY OF THE HAZARDS AT ALL FOR NOW
-      //if (currType != 't') {
-
-        for (char c : validDirs) {
-          if (c != currDir) {
-            int updatedPathCost = currPathCost + 1;
-            if (updatedPathCost < minCost[curr.y][curr.x][dirValue(c)] ) {
-              double distCost = euclideanDist(curr.x, curr.y);
-              minCost[curr.y][curr.x][dirValue(c)] = updatedPathCost;
-              List<Coordinate> newPath = deepCopy(currList);
-              newPath.add(new Coordinate(curr.x, curr.y, c));
-              pq.add(new TilePath(newPath, updatedPathCost, distCost));
-              breadthCount++;
-            }
+      // WE CAN ROTATE TO DIRECTIONS WHICH THE ROBOT CURRENTLY ISNT FACING
+      for (char c : validDirs) {
+        if (c != currDir) {
+          int updatedPathCost = currPathCost + 1;
+          if (updatedPathCost < minCost[curr.y][curr.x][dirValue(c)] ) {
+            double distCost = euclideanDist(curr.x, curr.y); //Heuristic for PriorityQueue comparator
+            minCost[curr.y][curr.x][dirValue(c)] = updatedPathCost;
+            List<Coordinate> newPath = deepCopy(currList);
+            newPath.add(new Coordinate(curr.x, curr.y, c));
+            pq.add(new TilePath(newPath, updatedPathCost, distCost));
+            breadthCount++;
           }
         }
-      //}
-
-      // ASSUME WE WILL NEVER REVERSE
-      // THIS LAST CASE IS IF THERE A HAZARD IN THE CORNER AND WE HAVE TO REVERSE ... WONT HAPPEN ...
-
+      }
     }
 
     System.out.println("NO PATH FOUND");
