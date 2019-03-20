@@ -59,8 +59,8 @@ right < _ _ |_ _ > left
   static int breadthCount = 0;
 
   // should access as selectedGrid[y][x]
-  static char[][] selectedGrid = grid2;
-  static Coordinate selectedObjective = obj2;
+  static char[][] selectedGrid = grid3;
+  static Coordinate selectedObjective = obj3;
 
   static Coordinate startLocation = new Coordinate(3, 0, 'u');
 
@@ -98,7 +98,8 @@ right < _ _ |_ _ > left
       Coordinate curr = currList.get(currList.size() - 1);
       char currDir = curr.dir;
 
-      System.out.println("CURR POS - X: " + curr.x + " Y: " + curr.y + " DIR: " + currDir + " PQ: " + pq.size() );
+      System.out.println("CURR POS - X: " + curr.x + " Y: " + curr.y + " DIR: " + currDir +
+        " Curr Path Cost: " + currPathCost + " PQ Size: " + pq.size() );
       System.out.println();
       //WE CAN ONLY MOVE FORWARD IN THE DIRECTION WE'RE FACING
 
@@ -111,6 +112,8 @@ right < _ _ |_ _ > left
         forwardX++;
       } else if (currDir == 'r') {
         forwardX--;
+      } else if (currDir == 'd') {
+        forwardY--;
       }
 
       if (validLocation(forwardX, forwardY)) {
@@ -156,11 +159,6 @@ right < _ _ |_ _ > left
     }
 
     System.out.println("NO PATH FOUND");
-    System.out.println(minCost[selectedObjective.y+1][selectedObjective.x][0]);
-    System.out.println(minCost[selectedObjective.y+1][selectedObjective.x][1]);
-    System.out.println(minCost[selectedObjective.y+1][selectedObjective.x][2]);
-    System.out.println(minCost[selectedObjective.y+1][selectedObjective.x][3]);
-    System.out.println("BREADTH COUNT: " + breadthCount);
   }
 
   public static List<Coordinate> deepCopy(List<Coordinate> list) {
